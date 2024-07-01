@@ -18,11 +18,12 @@ class CreateDepartmentsTable extends Migration
             $table->id();
             $table->string('department_name', 45)->unique();
             $table->unsignedBigInteger('superior_department_id')->nullable();
-            $table->foreign('superior_department_id')->references('id')->on('departments');
-            $table->string('ambassador_name')->nullable();
             $table->integer('employee_count')->unsigned();
             $table->integer('level')->unsigned();
+            $table->string('ambassador_name')->nullable();
             $table->timestamps();
+
+            $table->foreign('superior_department_id')->references('id')->on('departments');
         });
     }
 

@@ -58,50 +58,40 @@ const App: React.FC = () => {
       },
 });
 
-    
-  const columns: TableColumnsType<Department> = [
+const columns: TableColumnsType<Department> = [
   {
     title: 'División',
     dataIndex: 'department_name',
     key: 'department_name',
+    sorter: (a, b) => a.department_name.localeCompare(b.department_name),
     filters: data ? data.map((department) => ({ text: department.department_name, value: department.department_name })) : [],
-    filteredValue: filteredInfo.name || null,
-    onFilter: (value, data) => value == data.department_name,
-    sorter: (a, b) => a.department_name.length - b.department_name.length,
-    sortOrder: sortedInfo.columnKey === 'name' ? sortedInfo.order : null,
-    ellipsis: true,
+    onFilter: (value, record) => record.department_name.startsWith(value as string),
   },
   {
     title: 'División Superior', 
-    dataIndex: 'superior_department_id',
-    key: 'superior_department_id',
+    dataIndex: 'superior_department_name',
+    key: 'superior_department_name',
+    sorter: (a, b) => a.superior_department_name.localeCompare(b.superior_department_name),
+    filters: data ? [...new Set(data.map((department) => (department.superior_department_name)))].map((name) => ({text: name, value: name })) : [],
+    onFilter: (value, record) => record.superior_department_name.startsWith(value as string),
   },
   {
     title: 'Colaboradores',
     dataIndex: 'employee_count',
-    key: 'employee_count',
-    sorter: (a, b) => a.employee_count - b.employee_count,
-    sortOrder: sortedInfo.columnKey === 'employee_count' ? sortedInfo.order : null,
-    ellipsis: true,
+    key: 'employee_count',  
+    sorter: (a, b) => a.employee_count - b.employee_count
   },
   {
     title: 'Nivel',
     dataIndex: 'level',
     key: 'level',
-    filters: [
-      { text: 'London', value: 'London' },
-      { text: 'New York', value: 'New York' },
-    ],
-    filteredValue: filteredInfo.level || null,
-    onFilter: (value, record) => value == record.level,
     sorter: (a, b) => a.level - b.level,
-    sortOrder: sortedInfo.columnKey === 'level' ? sortedInfo.order : null,
-    ellipsis: true,
   },
   {
     title: 'Subdivisiones',
-    dataIndex: 'address2',
-    key: 'address'
+    dataIndex: 'subdepartments_total',
+    key: 'subdepartments_total',
+    sorter: (a, b) => a.subdepartments_total - b.subdepartments_total,
   },
   {
     title: 'Embajadores',
@@ -175,6 +165,13 @@ const App: React.FC = () => {
     tableParams?.sortField,
     JSON.stringify(tableParams.filters),
   ]);
+
+  const onChangeTable: TableProps<Department>['onChange'] = (pagination, filters, sorter, extra) => {
+    console.log('params', pagination, filters, sorter, extra);
+    setTableParams({
+      pagination: pagination
+})
+  };
 
   return (
     <Layout style={layoutStyle}>
@@ -270,7 +267,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <Table rowSelection={rowSelection} columns={columns} dataSource={data} pagination={tableParams.pagination} />
+        <Table rowSelection={rowSelection} columns={columns} dataSource={data} pagination={tableParams.pagination} onChange={onChangeTable}/>
         </div>
       </Content>
     </Layout>

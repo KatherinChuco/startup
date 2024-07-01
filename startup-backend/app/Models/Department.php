@@ -12,8 +12,13 @@ class Department extends Model
     protected $table = 'departments';
     protected $connection = 'mysql'; 
 
+    public function superiorDepartment () 
+    {
+        return $this->belongsTo(Department::class, 'superior_department_id');
+    }
+
     public function subdepartments()
     {
-        return $this->hasMany(Subdepartment::class, 'parent_department_id');
+        return $this->hasMany(Department::class, 'superior_department_id');
     }
 }

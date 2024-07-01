@@ -15,18 +15,25 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        return Department::all();
+        $deparments = Department::with(['superiorDepartment', 'subdepartments'])
+        ->withCount('subdepartments')
+        ->get();
+
+        $deparmentsCleanUp = $deparments->map(function ($department) {
+            return [
+                'id' => $department->id,
+                'department_name' => $department->department_name,
+                'superior_department_name' => $department->superiorDepartment ? $department->superiorDepartment->department_name : 'Ninguno',
+                'ambassador_name' => $department->ambassador_name ?? '-' ,
+                'employee_count' => $department->employee_count,
+                'level' => $department->level,
+                'subdepartments_total' => $department->subdepartments_count
+            ];
+        });
+        
+        return response()->json($deparmentsCleanUp);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -38,6 +45,7 @@ class DepartmentController extends Controller
     {
         $request->validate([
             'department_name' => 'required|unique:departments|max:45',
+            'superior_department_id' => 'nullable|exist:departments,id',
             'ambassador_name' => 'nullable',
             'employee_count' => 'required|integer|min:0',
             'level' => 'required|integer|min:0',
@@ -46,69 +54,41 @@ class DepartmentController extends Controller
         return Department::create($request->all());
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Department  $department
-     * @return \Illuminate\Http\Response
-     */
-    public function show(number $department)
+
+    public function show($id)
     {
-        return Department::findOrFail($department->id);
+        return Department::findOrFail($id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Department  $department
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Department $department)
-    {
-        //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Department  $department
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Department $department)
+    public function update(Request $request, $id)
     {
         $department = Department::findOrFail($id);
 
         $request->validate([
             'department_name' => 'required|unique:departments|max:45',
+            'superior_department_id' => 'nullable|exist:departments,id',
             'ambassador_name' => 'nullable',
             'employee_count' => 'required|integer|min:0',
             'level' => 'required|integer|min:0',
         ]);
 
-        $department->update($request->all());
-
-        return $department;
+        return $department->update($request->all());
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Department  $department
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Department $department)
+
+    public function destroy(int $id)
     {
-        $department = Department::findOrFail($departmen->id);
+        $department = Department::findOrFail($id);
         $department->delete();
 
         return response()->json(['message' => 'Department deleted successfully']);
     }
 
-    public function subdepartments($id)
+    public function subdepartments(int $id)
     {
-        $subdepartments = Subdepartment::where('parent_department_id', $id)->get();
-        return $subdepartments;
+        $subdepartments = Deparment::where('superior_department_id', $id)->get();
+        return response()->json($subdepartments);
     }
 }
 

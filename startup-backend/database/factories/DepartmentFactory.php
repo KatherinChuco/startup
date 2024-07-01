@@ -16,9 +16,10 @@ class DepartmentFactory extends Factory
     {
         return [
             'department_name' => $this->faker->unique()->word() . ' '. $this->faker->numberBetween(1, 100),
+            'superior_department_id' => null,
             'ambassador_name' => $this->faker->name(),
             'employee_count' => $this->faker->numberBetween(5, 50),
-            'level' => $this->faker->numberBetween(1, 5),
+            'level' => $this->faker->numberBetween(1, 3),
         ];
     }
 }
